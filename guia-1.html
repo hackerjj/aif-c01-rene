@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="auth.js"></script>
+<script src="sync.js?v=2.7.2"></script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía 1 · AIF-C01</title>
+<style>
+  :root { --bg:#0f172a; --card:#111c33; --ink:#e2e8f0; --muted:#94a3b8; --accent:#ff9900; --ok:#22c55e; --bad:#ef4444; --line:#1e2a44; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--ink); line-height:1.5; }
+  .wrap { padding-top:44px !important; max-width:820px; margin:0 auto; padding:20px 16px 60px; }
+  header { display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+  .pbar { flex:1; height:12px; background:#1e2a44; border-radius:99px; overflow:hidden; }
+  .pbar i { display:block; height:100%; width:0; background:var(--accent); transition:width .3s; }
+  .timer { font-variant-numeric:tabular-nums; font-weight:700; font-size:16px; min-width:64px; text-align:right; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px; }
+  .kind { font-size:12px; color:var(--accent); font-weight:700; letter-spacing:.4px; text-transform:uppercase; }
+  h1 { font-size:24px; margin:0 0 8px; }
+  h2 { font-size:19px; margin:6px 0 16px; }
+  p.muted { color:var(--muted); }
+  .btn { background:var(--accent); color:#111; border:0; border-radius:10px; padding:12px 18px; font-weight:800; font-size:15px; cursor:pointer; }
+  .btn:disabled { opacity:.4; cursor:not-allowed; }
+  .btn.sec { background:#1e2a44; color:var(--ink); }
+  button:focus-visible { outline:2px solid #fff; outline-offset:2px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .col { display:flex; flex-direction:column; gap:10px; }
+  .chip { display:block; width:100%; text-align:left; background:#0d1629; color:var(--ink); border:2px solid var(--line); border-radius:10px; padding:11px 12px; font-size:14.5px; cursor:pointer; }
+  .chip:hover { border-color:#334366; }
+  .chip.sel { border-color:var(--accent); background:#1a2540; }
+  .chip.done { border-color:var(--ok); background:#10291c; color:#9be7b4; cursor:default; }
+  .chip.wrong { border-color:var(--bad); background:#2a1215; }
+  .chip.used { visibility:hidden; }
+  .bank { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+  .bank .chip { width:auto; display:inline-block; }
+  .sentence { font-size:17px; line-height:2.2; }
+  .blank { display:inline-block; min-width:130px; border:0; border-bottom:2px solid var(--accent); padding:0 8px; margin:0 3px; text-align:center; cursor:pointer; background:none; color:var(--ink); font-size:16px; }
+  .actions { display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
+  .fb { margin-top:16px; padding:14px; border-radius:10px; font-size:14.5px; }
+  .fb.ok { background:#10291c; border:1px solid #1f6b3c; }
+  .fb.bad { background:#2a1215; border:1px solid #7f1d1d; }
+  .fb b.t { display:block; font-size:16px; margin-bottom:4px; }
+  .fb.ok b.t { color:var(--ok); } .fb.bad b.t { color:#fca5a5; }
+  table { width:100%; border-collapse:collapse; font-size:14.5px; margin-top:8px; }
+  th,td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+  th { background:#0d1629; color:var(--accent); }
+  tr:nth-child(even) td { background:#0d1629; }
+  .tip { border-left:3px solid var(--accent); background:#0d1629; padding:9px 12px; margin:14px 0 0; border-radius:0 8px 8px 0; font-size:14.5px; } .tip b { color:var(--accent); }
+  .flash { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px; }
+  .fcard { background:#0d1629; border:2px solid var(--line); border-radius:12px; padding:14px; min-height:110px; cursor:pointer; color:var(--ink); font-size:14.5px; text-align:left; width:100%; }
+  .fcard .term { font-weight:800; color:var(--accent); display:block; margin-bottom:4px; }
+  .fcard .hint { color:var(--muted); font-size:12.5px; }
+  .fcard.flip { border-color:#1f6b3c; }
+  .score { font-size:40px; font-weight:800; color:var(--accent); }
+  #msg { color:var(--ok); font-size:13px; margin-top:8px; min-height:1em; }
+  @media (max-width:560px){ .grid2{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:10px;left:12px;z-index:50;background:#1e2a44;color:#e2e8f0;text-decoration:none;font:700 13px -apple-system,BlinkMacSystemFont,sans-serif;padding:7px 11px;border-radius:8px">Inicio</a>
+
+<div class="wrap">
+  <header>
+    <div class="pbar" aria-hidden="true"><i id="pb"></i></div>
+    <div class="timer" id="timer" aria-label="Tiempo transcurrido">00:00</div>
+    <button type="button" class="btn sec" id="restart" style="padding:6px 10px;font-size:13px">Reiniciar</button>
+  </header>
+  <main id="app" aria-live="polite"></main>
+</div>
+
+<script>
+const T = [
+ {id:"svc", title:"1. Servicios especializados: qué entra y qué sale",
+  head:["Servicio","Entra","Sale","Pista en la pregunta"],
+  rows:[["Textract","Documento o imagen de un documento","Texto, tablas, campos","Facturas, contratos escaneados, credenciales, formularios"],
+        ["Transcribe","Audio o voz","Texto","Llamadas grabadas, podcasts, subtítulos"],
+        ["Polly","Texto","Voz","Leer en voz alta, IVR que habla"],
+        ["Comprehend","Texto","Sentimiento, entidades, PII","Reseñas molestas, extraer nombres de un texto"],
+        ["Translate","Texto en un idioma","Texto en otro idioma","Catálogo en varios idiomas"],
+        ["Rekognition","Foto o video","Objetos, rostros, contenido inapropiado","Moderar imágenes, analizar video"],
+        ["Personalize","Historial de comportamiento","Recomendaciones","\"Recomendado para ti\""]],
+  tip:"<b>Truco:</b> Textract = texto que ya está escrito en papel. Transcribe = transforma voz en texto. Si hay audio de por medio, es Transcribe.",
+  flash:[["PII","Información personal identificable: nombre, CURP, teléfono, correo, número de tarjeta."],["OCR","Reconocimiento óptico de caracteres: leer el texto de una imagen. Lo hace Textract en documentos."],["Entidad","Algo con nombre propio dentro de un texto: persona, empresa, lugar, fecha. Comprehend las detecta."]],
+  match:[["Textract","Leer facturas escaneadas"],["Transcribe","Llamada grabada a texto"],["Polly","Texto a voz natural"],["Comprehend","Sentimiento de reseñas"],["Translate","Sitio en 5 idiomas"],["Rekognition","Moderar fotos subidas"],["Personalize","\"Los que compraron esto también compraron\""]],
+  fill:[{text:"Si en la pregunta hay audio de por medio uso ___. Si es un documento escaneado uso ___.", ans:["Transcribe","Textract"], bank:["Textract","Polly","Transcribe","Rekognition"]},
+        {text:"Para saber si un cliente quedó molesto en una llamada grabada combino ___ y luego ___.", ans:["Transcribe","Comprehend"], bank:["Comprehend","Polly","Textract","Transcribe"]}]},
+ {id:"hum", title:"2. Humanos en el ciclo: Ground Truth vs A2I",
+  head:["Servicio","Cuándo","Para qué","Pista"],
+  rows:[["SageMaker Ground Truth","Antes de entrenar","Personas etiquetan los datos","\"Datos sin etiquetar\", \"crear el dataset\""],
+        ["Amazon A2I","En producción","Una persona revisa predicciones dudosas","\"Baja confianza\", \"revisión humana antes de decidir\""]],
+  tip:"<b>Truco:</b> Ground Truth = la verdad de base con la que el modelo aprende. A2I = la segunda opinión humana cuando el modelo ya trabaja.",
+  flash:[["Etiquetar (labeling)","Poner la respuesta correcta a cada dato para entrenar: \"esta foto tiene defecto\", \"esta transacción es fraude\"."],["Human-in-the-loop","Una persona participa en el flujo para revisar o decidir. En AWS: A2I."],["Umbral de confianza","Porcentaje mínimo de seguridad del modelo; abajo de ese número se manda a revisión humana."]],
+  fill:[{text:"___ sirve para etiquetar los datos antes de entrenar. ___ manda a una persona las predicciones dudosas en producción.", ans:["Ground Truth","A2I"], bank:["A2I","Clarify","Ground Truth","Model Monitor"]}]},
+ {id:"gov", title:"3. Gobernanza y monitoreo",
+  head:["Servicio","Responde a","Pista"],
+  rows:[["CloudTrail","¿Quién hizo qué, cuándo y desde dónde?","Llamadas a la API, quién borró, IP"],
+        ["CloudWatch","¿Cómo se comporta ahora?","Métricas, latencia, errores, logs, alarmas"],
+        ["Config","¿Cómo está configurado y cómo cambió?","Historial de configuración, reglas de cumplimiento"],
+        ["Audit Manager","¿Qué evidencia tengo para el auditor?","SOC 2, marcos de control, auditoría externa"],
+        ["Trusted Advisor","¿Qué me recomienda AWS?","Costo, seguridad, límites. Solo aconseja"]],
+  tip:"<b>Truco:</b> Trail = rastro de acciones. Watch = vigilar el tablero. Config = foto de la configuración. Audit Manager = carpeta para el auditor. Trusted Advisor = consejero.",
+  flash:[["Llamada a la API","Cada acción en AWS (crear, borrar, invocar un modelo) es una llamada a la API. CloudTrail las registra."],["Métrica","Un número que se mide en el tiempo: latencia, errores, uso de CPU. Vive en CloudWatch."],["Regla de cumplimiento","Condición que un recurso debe cumplir, como \"todo bucket cifrado\". Se evalúa con Config."]],
+  match:[["CloudTrail","Quién borró el endpoint ayer"],["CloudWatch","Alarma cuando la latencia pasa de 3 s"],["Config","Detectar un bucket que no está cifrado"],["Audit Manager","Evidencia para la auditoría SOC 2"],["Trusted Advisor","Recomendaciones para bajar costos"]],
+  fill:[{text:"___ registra quién hizo cada acción. ___ muestra métricas y dispara alarmas.", ans:["CloudTrail","CloudWatch"], bank:["CloudWatch","Config","CloudTrail","Trusted Advisor"]}]},
+ {id:"sm", title:"4. Herramientas de SageMaker para gobernar modelos",
+  head:["Servicio","Pregunta que responde","Cuándo"],
+  rows:[["Clarify","¿Es justo? Sesgo y qué variables pesan","Antes de desplegar (y también puede revisarse después)"],
+        ["Model Monitor","¿Se echó a perder? Drift contra el baseline","En producción"],
+        ["Model Cards","¿Dónde está documentado?","Gobernanza y documentación"],
+        ["Ground Truth","¿Quién etiqueta los datos?","Antes de entrenar"],
+        ["A2I","¿Quién revisa lo dudoso?","En producción"]],
+  tip:"<b>Truco:</b> \"sesgo\", \"justo\", \"qué variables pesaron\" = Clarify. \"meses después\", \"cambió el comportamiento\", \"se aleja del baseline\" = Model Monitor. \"documentar\", \"uso previsto\", \"riesgo\" = Model Cards.",
+  flash:[["Sesgo (bias)","El modelo trata de forma desigual a un grupo (género, edad). Se revisa con Clarify."],["Explicabilidad","Poder decir qué variables influyeron en una decisión del modelo. También es Clarify."],["Drift","Los datos o la calidad cambian con el tiempo en producción y el modelo empeora. Lo detecta Model Monitor."],["Baseline","La referencia: cómo eran los datos y la calidad cuando entrenaste. Model Monitor compara contra ella."]],
+  match:[["Clarify","Revisar que el modelo de RH no favorezca a un género"],["Model Monitor","Alerta: los datos nuevos ya no se parecen a los de entrenamiento"],["Model Cards","Ficha con uso previsto, riesgo y datos de entrenamiento"],["Ground Truth","Radiólogos marcan tumores para crear el dataset"],["A2I","Un analista revisa préstamos con confianza menor a 80%"]],
+  fill:[{text:"Para revisar el sesgo uso ___. Para detectar drift en producción uso ___. Para documentar el modelo uso ___.", ans:["Clarify","Model Monitor","Model Cards"], bank:["Model Cards","Ground Truth","Clarify","Model Monitor","A2I"]}]},
+ {id:"rec", title:"5. Recomendar vs responder",
+  head:["Necesidad","Servicio"],
+  rows:[["Recomendar productos o contenido según el comportamiento","Personalize"],["Responder preguntas sobre documentos propios","Bedrock Knowledge Bases (o Amazon Q Business como producto listo)"]],
+  fill:[{text:"Para \"recomendado para ti\" uso ___. Para responder preguntas sobre las políticas internas uso ___.", ans:["Personalize","Knowledge Bases"], bank:["Knowledge Bases","Comprehend","Personalize","Rekognition"]}]},
+ {id:"pr", title:"6. Técnicas de prompt",
+  head:["Técnica","Qué hace","Pista"],
+  rows:[["Zero-shot","Pide la tarea sin ejemplos","Solo la instrucción"],["Few-shot","Da algunos ejemplos de entrada y salida","\"Incluyen 3 ejemplos\""],["Chain-of-thought","Pide razonar por pasos","\"Paso a paso\", cálculos"],["Negative prompting","Dice lo que NO debe hacer","\"No incluyas\", \"evita\""]],
+  match:[["Zero-shot","\"Resume este texto.\""],["Few-shot","Tres ejemplos antes de la pregunta"],["Chain-of-thought","\"Razona paso a paso.\""],["Negative prompting","\"No menciones precios.\""]]},
+ {id:"met", title:"7. Métricas",
+  head:["Métrica","Úsala cuando"],
+  rows:[["Accuracy","Clases balanceadas. Con clases desbalanceadas engaña."],["Recall","Lo peor es que se escape un positivo (fraude, enfermedad)."],["Precision","Lo peor es una falsa alarma (spam que era correo bueno)."],["F1-score","Balancear precision y recall."],["RMSE","Regresión."],["ROUGE","Resúmenes vs referencia."],["BLEU","Traducciones vs referencia."]],
+  tip:"<b>Truco:</b> Recall = no se me escapa nadie. Precision = cuando digo que sí, de verdad es sí.",
+  flash:[["Clases desbalanceadas","Una clase es rarísima (1% fraude). Un modelo que nunca la detecta saca 99% de accuracy y no sirve."],["Falso positivo","El modelo dice que sí y era que no (falsa alarma). Lo cuida precision."],["Falso negativo","El modelo dice que no y era que sí (se escapó). Lo cuida recall."]],
+  match:[["ROUGE","Calificar resúmenes"],["BLEU","Calificar traducciones"],["RMSE","Error al predecir precios"],["Recall","No dejar escapar a un paciente enfermo"],["Precision","No mandar a spam correos buenos"]],
+  fill:[{text:"Si lo peor es que se escape un fraude priorizo ___. Si lo peor es una falsa alarma priorizo ___.", ans:["recall","precision"], bank:["accuracy","precision","RMSE","recall"]}]},
+ {id:"inf", title:"8. Formas de inferencia en Bedrock",
+  head:["Opción","Cuándo"],
+  rows:[["On-demand","Tráfico variable, pagas por token. La opción por defecto."],["Batch inference","Muchos documentos sin prisa, más barato."],["Provisioned Throughput","Capacidad garantizada para tráfico alto y constante o un modelo fine-tuned."]],
+  fill:[{text:"Para resumir 50,000 documentos cada noche al menor costo uso ___. Para un modelo fine-tuned con tráfico constante 24/7 uso ___.", ans:["batch inference","Provisioned Throughput"], bank:["on-demand","Provisioned Throughput","batch inference"]}]},
+ {id:"ml", title:"9. Fundamentos de ML",
+  head:["Si la pregunta dice...","Es..."],
+  rows:[["La salida es un número (precio, unidades)","Regresión"],["La salida es una categoría (fraude sí o no)","Clasificación"],["No hay etiquetas y quiero formar grupos","Clustering"],["Aprende con recompensas y castigos","Aprendizaje por refuerzo"],["Bien en entrenamiento, mal en prueba","Overfitting"],["Mal en entrenamiento y mal en prueba","Underfitting"]],
+  flash:[["Etiqueta","La respuesta correcta de cada ejemplo de entrenamiento. Si existe, es aprendizaje supervisado."],["Overfitting","El modelo memorizó el entrenamiento y no generaliza. Se corrige con más datos variados o regularización."],["Underfitting","El modelo es demasiado simple y falla en todo."]],
+  fill:[{text:"Número = ___. Categoría = ___. Sin etiquetas = ___.", ans:["regresión","clasificación","clustering"], bank:["clustering","refuerzo","regresión","clasificación"]},
+        {text:"98% en entrenamiento y 70% en prueba es ___. 60% en entrenamiento y 58% en prueba es ___.", ans:["overfitting","underfitting"], bank:["underfitting","drift","overfitting"]}]},
+ {id:"gen", title:"10. GenAI: parámetros y alucinaciones",
+  head:["Concepto","Qué recordar"],
+  rows:[["Temperatura baja","Respuestas consistentes y predecibles"],["Temperatura alta","Respuestas creativas y variadas"],["Alucinación","Respuesta creíble pero inventada"],["Cómo reducirla","Grounding con RAG y pedir que diga \"no sé\" si no está en el contexto"]],
+  flash:[["Grounding","Darle al modelo fuentes confiables como contexto para que responda con base en ellas."],["Token","Pedazo de texto que procesa el modelo. Se paga por tokens de entrada y de salida."]],
+  fill:[{text:"Una temperatura ___ da consistencia. Una temperatura ___ da creatividad.", ans:["baja","alta"], bank:["alta","baja","Top-K"]},
+        {text:"Para reducir alucinaciones uso ___ con documentos oficiales y le pido que diga ___ cuando no tenga la información.", ans:["RAG","no sé"], bank:["no sé","fine-tuning","RAG","temperatura alta"]}]}
+];
+// Arma los pasos: por cada tema, lección (tabla), tarjetas, unir y completar.
+const S = [];
+T.forEach(t=>{
+  S.push({t:"lesson", topic:t});
+  if(t.flash) S.push({t:"flash", topic:t, cards:t.flash});
+  if(t.match) S.push({t:"match", topic:t, pairs:t.match});
+  if(t.fill) t.fill.forEach(f=>S.push({t:"fill", topic:t, f}));
+});
+const SCORED = S.filter(s=>s.t==="match"||s.t==="fill").length;
+const KIND = {lesson:"Lección", flash:"¿Qué significa?", match:"Une las parejas", fill:"Completa la frase"};
+const KEY = "rene-guia1";
+let st = JSON.parse(localStorage.getItem(KEY) || "null") || {started:false, done:false, idx:0, base:0, res:{}};
+let runFrom=null, stepFrom=null, tick=null, cur=null;
+
+function save(){ localStorage.setItem(KEY, JSON.stringify(st)); }
+function elapsed(){ return st.base + (runFrom ? Date.now()-runFrom : 0); }
+function fmt(ms){ const s=Math.round(ms/1000); return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0"); }
+function startClock(){ runFrom=Date.now(); tick=setInterval(()=>{ document.getElementById("timer").textContent=fmt(elapsed()); },500); }
+function stopClock(){ st.base=elapsed(); runFrom=null; clearInterval(tick); document.getElementById("timer").textContent=fmt(st.base); save(); }
+window.addEventListener("beforeunload", ()=>{ if(runFrom){ st.base=elapsed(); save(); } });
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+const app=document.getElementById("app");
+function progress(){ document.getElementById("pb").style.width=(100*st.idx/S.length)+"%"; }
+
+function intro(){
+  app.innerHTML='<div class="card"><div class="kind">Guía paso a paso</div><h1>10 temas, una pantalla a la vez</h1>'+
+   '<p class="muted">Cada tema empieza con su tabla para leer. Luego vienen las tarjetas de "¿Qué significa?", las parejas para unir y las frases para completar. Solo las parejas y las frases cuentan para tu puntaje, y cuentan como correctas solo si las resuelves sin errores al primer intento.</p>'+
+   '<p class="muted">El timer arranca cuando das clic en Iniciar. Se guarda el tiempo total y el de cada paso.</p>'+
+   '<div class="actions"><button class="btn" id="go">Iniciar</button></div></div>';
+  document.getElementById("go").onclick=()=>{ st.started=true; save(); startClock(); show(); };
+}
+function head(s){ const pos=st.idx+1; return '<div class="kind">'+esc(s.topic.title)+' · '+KIND[s.t]+' · Paso '+pos+' de '+S.length+'</div>'; }
+function show(){
+  progress();
+  if(st.idx>=S.length) return finish();
+  const s=S[st.idx]; stepFrom=elapsed(); cur={s, err:0, resp:null};
+  if(s.t==="lesson") renderLesson(s); else if(s.t==="flash") renderFlash(s); else if(s.t==="match") renderMatch(s); else renderFill(s);
+}
+function nextBtn(container,label){
+  const a=document.createElement("div"); a.className="actions";
+  const b=document.createElement("button"); b.className="btn"; b.textContent=label||(st.idx+1>=S.length?"Ver resultados":"Continuar");
+  b.onclick=()=>{ if(!st.res[st.idx]) recordTime(); st.idx++; save(); show(); };
+  a.appendChild(b); container.appendChild(a); b.focus();
+}
+function recordTime(){ st.res[st.idx]={tipo:cur.s.t, tema:cur.s.topic.title, segundos:Math.round((elapsed()-stepFrom)/1000)}; save(); }
+function record(ok){ st.res[st.idx]={tipo:cur.s.t, tema:cur.s.topic.title, correcto:ok, errores:cur.err, segundos:Math.round((elapsed()-stepFrom)/1000), respuesta:cur.resp}; save(); }
+
+function renderLesson(s){
+  const t=s.topic, card=document.createElement("div"); card.className="card";
+  let h=head(s)+'<h2>'+esc(t.title)+'</h2><table><thead><tr>'+t.head.map(x=>'<th>'+esc(x)+'</th>').join("")+'</tr></thead><tbody>'+
+    t.rows.map(r=>'<tr>'+r.map((c,i)=>'<td>'+(i===0?'<b>'+esc(c)+'</b>':esc(c))+'</td>').join("")+'</tr>').join("")+'</tbody></table>';
+  if(t.tip) h+='<div class="tip">'+t.tip+'</div>';
+  card.innerHTML=h; app.innerHTML=""; app.appendChild(card); nextBtn(card,"Ya lo leí, continuar");
+}
+function renderFlash(s){
+  const card=document.createElement("div"); card.className="card";
+  card.innerHTML=head(s)+'<h2>Toca cada tarjeta para ver qué significa</h2><div class="flash" id="fl"></div>';
+  app.innerHTML=""; app.appendChild(card);
+  const g=card.querySelector("#fl"); let seen=0; const total=s.cards.length;
+  s.cards.forEach(c=>{ const b=document.createElement("button"); b.className="fcard"; b.type="button"; b.setAttribute("aria-expanded","false");
+    const front='<span class="term">'+esc(c[0])+'</span><span class="hint">Toca para voltear</span>', back='<span class="term">'+esc(c[0])+'</span>'+esc(c[1]);
+    b.innerHTML=front; let opened=false;
+    b.onclick=()=>{ const f=b.classList.toggle("flip"); b.innerHTML=f?back:front; b.setAttribute("aria-expanded",f?"true":"false");
+      if(f&&!opened){ opened=true; seen++; if(seen===total) btn.disabled=false; } };
+    g.appendChild(b); });
+  nextBtn(card); const btn=card.querySelector(".actions .btn"); btn.disabled=true; btn.title="Voltea todas las tarjetas para continuar";
+}
+function feedback(ok,correct){
+  const box=document.createElement("div"); box.className="fb "+(ok?"ok":"bad");
+  box.innerHTML='<b class="t">'+(ok?"Correcto":"No del todo")+'</b>'+(ok||!correct?"":'<div>Respuesta correcta: <b>'+esc(correct)+'</b></div>');
+  return box;
+}
+function renderMatch(s){
+  const card=document.createElement("div"); card.className="card";
+  card.innerHTML=head(s)+'<h2>Une cada concepto con su pareja</h2><div class="grid2"><div class="col" id="L"></div><div class="col" id="R"></div></div>';
+  app.innerHTML=""; app.appendChild(card);
+  const L=card.querySelector("#L"), R=card.querySelector("#R"); let sel=null, left=s.pairs.length;
+  s.pairs.forEach((p,i)=>{ const b=document.createElement("button"); b.className="chip"; b.textContent=p[0]; b.dataset.i=i; L.appendChild(b);
+    b.onclick=()=>{ if(b.classList.contains("done")) return; L.querySelectorAll("button").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); sel=b; }; });
+  shuffle(s.pairs.map((p,i)=>i)).forEach(i=>{ const b=document.createElement("button"); b.className="chip"; b.textContent=s.pairs[i][1]; b.dataset.i=i; R.appendChild(b);
+    b.onclick=()=>{ if(b.classList.contains("done")||!sel) return;
+      if(b.dataset.i===sel.dataset.i){ [b,sel].forEach(x=>{x.classList.remove("sel");x.classList.add("done");}); sel=null; left--;
+        if(!left){ cur.resp="todas unidas"; const ok=cur.err===0; record(ok);
+          const fb=feedback(ok,""); if(!ok){ fb.querySelector("b.t").textContent="Completado con "+cur.err+" error(es)"; } card.appendChild(fb); nextBtn(card); } }
+      else { cur.err++; const x=sel; b.classList.add("wrong"); x.classList.add("wrong"); setTimeout(()=>{b.classList.remove("wrong"); x.classList.remove("wrong");},600); } }; });
+}
+function renderFill(s){
+  const f=s.f, card=document.createElement("div"); card.className="card";
+  const parts=f.text.split("___"); let h=head(s)+'<h2>Completa la frase</h2><p class="sentence">';
+  parts.forEach((p,i)=>{ h+=esc(p); if(i<parts.length-1) h+='<button class="blank" aria-label="Espacio '+(i+1)+'">&nbsp;</button>'; });
+  h+='</p><div class="bank" id="bank"></div><div class="actions"><button class="btn" id="chk" disabled>Comprobar</button></div>';
+  card.innerHTML=h; app.innerHTML=""; app.appendChild(card);
+  const fill=new Array(f.ans.length).fill(null), bank=card.querySelector("#bank"), chk=card.querySelector("#chk"), blanks=[...card.querySelectorAll(".blank")];
+  shuffle(f.bank).forEach(w=>{ const b=document.createElement("button"); b.className="chip"; b.textContent=w; bank.appendChild(b);
+    b.onclick=()=>{ if(chk.dataset.done) return; const k=fill.indexOf(null); if(k<0) return; fill[k]=b; b.classList.add("used"); blanks[k].textContent=w; chk.disabled=fill.includes(null); }; });
+  blanks.forEach((bl,k)=>bl.onclick=()=>{ if(!fill[k]||chk.dataset.done) return; fill[k].classList.remove("used"); fill[k]=null; bl.innerHTML="&nbsp;"; chk.disabled=true; });
+  chk.onclick=()=>{ chk.dataset.done=1; const got=fill.map(b=>b.textContent); cur.resp=got.join(" | ");
+    const ok=got.every((g,i)=>g===f.ans[i]); if(!ok) cur.err=1; record(ok);
+    chk.parentNode.remove(); card.appendChild(feedback(ok,f.ans.join(" / "))); nextBtn(card); };
+}
+
+function scored(){ return Object.values(st.res).filter(r=>r.tipo==="match"||r.tipo==="fill"); }
+function summaryText(){
+  const sc=scored(), ok=sc.filter(r=>r.correcto).length;
+  const lines=Object.keys(st.res).map(Number).sort((a,b)=>a-b).map(i=>{ const r=st.res[i];
+    return (i+1)+" · "+r.tema+" · "+KIND[r.tipo]+(r.correcto===undefined?"":(r.correcto?" · correcto":" · incorrecto")+(r.errores?" · errores "+r.errores:""))+" · "+r.segundos+" s"+(r.tipo==="fill"?" · resp: "+r.respuesta:""); });
+  return "Guía paso a paso AIF-C01\nPuntaje: "+ok+" de "+SCORED+"\nTiempo total: "+fmt(st.base)+"\n"+lines.join("\n");
+}
+function finish(){
+  if(!st.done){ stopClock(); st.done=true; st.fin=Date.now(); save(); }
+  document.getElementById("pb").style.width="100%";
+  const sc=scored(), ok=sc.filter(r=>r.correcto).length;
+  const byTopic={}; Object.values(st.res).forEach(r=>{ const b=byTopic[r.tema]||(byTopic[r.tema]={ok:0,n:0,s:0}); b.s+=r.segundos; if(r.correcto!==undefined){ b.n++; if(r.correcto) b.ok++; } });
+  const rows=T.map(t=>{ const b=byTopic[t.title]||{ok:0,n:0,s:0}; return '<tr><td>'+esc(t.title)+'</td><td>'+(b.n?b.ok+" de "+b.n:"—")+'</td><td>'+fmt(b.s*1000)+'</td></tr>'; }).join("");
+  app.innerHTML='<div class="card"><div class="kind">Resultados</div><div class="score">'+ok+' de '+SCORED+'</div><p class="muted">Tiempo total: <b style="color:#e2e8f0">'+fmt(st.base)+'</b></p>'+
+   '<table><thead><tr><th>Tema</th><th>Ejercicios correctos</th><th>Tiempo</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+   '<div class="actions"><button class="btn sec" id="rs">Repetir guía</button><button class="btn sec" id="sv">Guardar archivo</button><button class="btn" id="cp">Copiar resultados</button></div><div id="msg" role="status"></div></div>';
+  const msg=t=>document.getElementById("msg").textContent=t;
+  document.getElementById("cp").onclick=async()=>{ try{ await navigator.clipboard.writeText(summaryText()); msg("Copiado."); }catch(e){ prompt("Copia este texto:",summaryText()); } };
+  document.getElementById("rs").onclick=()=>{ if(confirm("¿Empezar la guía de nuevo? Se borra este resultado del navegador.")){ localStorage.removeItem(KEY); location.reload(); } };
+  document.getElementById("sv").onclick=async()=>{
+    const data=JSON.stringify({examen:"guia-paso-a-paso", fecha:new Date().toISOString(), puntaje:ok, total:SCORED, tiempo_total_seg:Math.round(st.base/1000), tiempo_total:fmt(st.base), pasos:st.res},null,2);
+    try{ if(window.showSaveFilePicker){ const h=await window.showSaveFilePicker({suggestedName:"respuestas-guia-paso-a-paso.json",types:[{description:"JSON",accept:{"application/json":[".json"]}}]}); const w=await h.createWritable(); await w.write(data); await w.close(); }
+      else { const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([data],{type:"application/json"})); a.download="respuestas-guia-paso-a-paso.json"; a.click(); }
+      msg("Archivo guardado."); }catch(e){ if(e.name!=="AbortError") msg("No se pudo guardar: usa Copiar resultados."); }
+  };
+}
+document.getElementById("restart").onclick=()=>{ if(confirm("¿Reiniciar la guía desde el principio? Se borra tu avance y el tiempo.")){ clearInterval(tick); runFrom=null; localStorage.removeItem(KEY); location.reload(); } };
+window.addEventListener("beforeunload",()=>{});
+document.getElementById("timer").textContent=fmt(st.base);
+if(!st.started) intro(); else if(st.done) finish(); else { startClock(); show(); }
+</script>
+</body>
+</html>

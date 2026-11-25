@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Rene · AWS Certified AI Practitioner</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23ff9900'/%3E%3Ctext x='32' y='42' font-size='28' font-family='Arial' font-weight='700' text-anchor='middle' fill='%23111'%3EAI%3C/text%3E%3C/svg%3E">
+<style>
+  :root { --bg:#0f172a; --card:#111c33; --ink:#e2e8f0; --muted:#94a3b8; --accent:#ff9900; --ok:#22c55e; --bad:#ef4444; --line:#1e2a44; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--ink); line-height:1.55; }
+  main { max-width:900px; margin:0 auto; padding:26px 16px 70px; }
+  h1 { font-size:26px; margin:0 0 4px; } h1 span { color:var(--accent); }
+  h2 { font-size:18px; margin:30px 0 10px; border-bottom:1px solid var(--line); padding-bottom:6px; }
+  .sub { color:var(--muted); font-size:14.5px; margin:0 0 14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; }
+  .ico { display:inline-block; width:1.1em; height:1.1em; vertical-align:-0.18em; margin-right:6px; }
+  label.f { display:block; font-size:13.5px; color:var(--muted); margin:12px 0 5px; }
+  input[type=password], input[type=text], textarea { width:100%; background:#0d1629; color:var(--ink); border:1px solid #334366; border-radius:9px; padding:11px 12px; font-size:15px; }
+  textarea { min-height:90px; resize:vertical; font-family:inherit; }
+  .btn { background:var(--accent); color:#111; border:0; border-radius:9px; padding:11px 16px; font-weight:800; font-size:14.5px; cursor:pointer; text-decoration:none; display:inline-block; }
+  .btn.sec { background:#1e2a44; color:var(--ink); }
+  .btn:disabled { opacity:.45; cursor:not-allowed; }
+  button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline:2px solid #fff; outline-offset:2px; }
+  .err { color:#fca5a5; font-size:13.5px; min-height:1.2em; margin-top:8px; }
+  .okm { color:#9be7b4; font-size:13.5px; min-height:1.2em; margin-top:8px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .sp { flex:1; }
+  .mods { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px; }
+  .mod { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:6px; }
+  .mod .n { font-size:12px; color:var(--accent); font-weight:800; letter-spacing:.4px; text-transform:uppercase; }
+  .mod h3 { margin:0; font-size:16.5px; }
+  .mod p { margin:0; color:var(--muted); font-size:13.5px; flex:1; }
+  .st { font-size:13px; font-weight:700; }
+  .st.done { color:var(--ok); } .st.prog { color:var(--accent); } .st.none { color:var(--muted); }
+  .mod .btn { margin-top:8px; text-align:center; }
+  .badge { align-self:flex-start; font-size:12px; font-weight:800; padding:3px 9px; border-radius:99px; }
+  .badge.hi { background:#7f1d1d; color:#fecaca; } .badge.md { background:#5a3a07; color:#fde68a; } .badge.lo { background:#14532d; color:#bbf7d0; } .badge.na { background:#1e2a44; color:var(--muted); }
+  table.rt { width:100%; border-collapse:collapse; font-size:14px; margin-top:10px; } table.rt th, table.rt td { border:1px solid var(--line); padding:7px 9px; text-align:left; vertical-align:top; } table.rt th { background:#0d1629; color:var(--accent); }
+  .steps { margin:0; padding-left:20px; color:var(--muted); font-size:14px; } .steps li { margin:4px 0; }
+  .stars { display:flex; gap:6px; flex-wrap:wrap; }
+  .stars button { background:#0d1629; color:var(--ink); border:2px solid var(--line); border-radius:10px; padding:8px 12px; font-weight:800; cursor:pointer; font-size:14px; }
+  .stars button.on { border-color:var(--accent); background:#1a2540; }
+  .q { margin:14px 0 4px; font-weight:700; font-size:14.5px; }
+  .hint { color:var(--muted); font-size:12.5px; }
+  .hidden { display:none !important; }
+  details { margin-top:12px; } summary { cursor:pointer; color:var(--accent); font-weight:700; font-size:14px; }
+
+  .next { background:linear-gradient(135deg,#2a1d06,#111c33); border:2px solid var(--accent); border-radius:14px; padding:18px 20px; margin:0 0 18px; }
+  .next .k { font-size:12px; color:var(--accent); font-weight:800; letter-spacing:.5px; text-transform:uppercase; }
+  .next h2 { margin:4px 0 6px; font-size:21px; border:0; padding:0; }
+  .next p { margin:0 0 6px; color:var(--ink); font-size:14.5px; }
+  .next .meta { color:var(--muted); font-size:13px; }
+  .next .row { margin-top:12px; }
+  .mod.is-next { border:2px solid var(--accent); box-shadow:0 0 0 3px rgba(255,153,0,.15); }
+  .mod .nx { align-self:flex-start; background:var(--accent); color:#111; font-size:11.5px; font-weight:800; padding:2px 8px; border-radius:99px; }
+  .vh-wrap { text-align:center; padding:18px 0 8px; }
+  .vh-btn { background:none; border:0; padding:0; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; color:var(--muted); text-decoration:underline dotted; text-underline-offset:3px; cursor:pointer; }
+  .vh-btn:hover, .vh-btn:focus-visible { color:var(--ink); }
+  .vh-txt { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <!-- LOGIN -->
+  <section id="login" class="hidden" aria-labelledby="lt">
+    <h1 id="lt">Hola, <span>Rene</span></h1>
+    <p class="sub">Tu curso para la certificación AWS Certified AI Practitioner (AIF-C01). Escribe tu contraseña para entrar.</p>
+    <form class="card" id="lf" autocomplete="off" style="max-width:420px">
+      <label class="f" for="pw">Contraseña</label>
+      <input type="password" id="pw" autocomplete="current-password" required>
+      <div class="err" id="lerr" role="alert"></div>
+      <div class="row" style="margin-top:6px"><span class="sp"></span><button class="btn" type="submit">Entrar</button></div>
+    </form>
+  </section>
+
+  <!-- APP -->
+  <section id="app" class="hidden">
+    <div class="row">
+      <div><h1>Hola, <span>Rene</span></h1><p class="sub" style="margin:0">Tu curso para AWS Certified AI Practitioner (AIF-C01)</p></div>
+      <span class="sp"></span>
+      <button class="btn sec" type="button" id="logout">Cerrar sesión</button>
+    </div>
+
+    <div class="next" id="next" role="region" aria-label="Tu siguiente paso" style="margin-top:18px"></div>
+
+    <h2>Cómo llevar el curso</h2>
+    <ol class="steps">
+      <li><b>Diagnóstico</b> (Paso 0): 20 preguntas para ver de dónde partes. Con tu resultado se ajusta tu ruta.</li>
+      <li><b>Guía 1</b>: los conceptos base y los servicios que más se confunden.</li>
+      <li><b>Práctica interactiva</b>: une, completa y ordena, con retroalimentación inmediata.</li>
+      <li><b>Guía 2</b>: los temas avanzados: seguridad, kit de SageMaker, asistentes, cómo adaptar y evaluar modelos.</li>
+      <li><b>Simulacro</b>: 65 preguntas en 90 minutos, igual que el examen real. Al terminar te califica solo y te muestra cada respuesta con su explicación.</li>
+      <li>La <b>hoja de contrastes</b> es para repasar cuando quieras. La meta para agendar el examen es <b>80% o más</b> en el simulacro.</li>
+    </ol>
+
+    <h2>Tu ruta</h2>
+    <div class="card" id="ruta"></div>
+
+    <h2>Tus módulos</h2>
+    <div class="mods" id="mods"></div>
+
+    <h2>Tus datos</h2>
+    <div class="card">
+      <p class="sub" style="margin-top:0">Tu avance se guarda automáticamente en este navegador. Si cambias de computadora o borras el historial, se pierde. Descarga tu respaldo de vez en cuando y guárdalo en tu carpeta; para recuperarlo, usa "Cargar respaldo".</p>
+      <div class="row">
+        <button class="btn" type="button" id="exp">Descargar mi respaldo</button>
+        <button class="btn sec" type="button" id="imp">Cargar respaldo</button>
+        <input type="file" id="impf" accept="application/json,.json" class="hidden" aria-label="Archivo de respaldo">
+      </div>
+      <div class="okm" id="dmsg" role="status"></div>
+    </div>
+
+    <h2>Tu opinión del curso</h2>
+    <form class="card" id="csat">
+      <p class="sub" style="margin-top:0">Ayúdanos a mejorar el contenido. Tarda un minuto.</p>
+      <div class="q" id="q1">¿Qué tan satisfecha estás con el curso en general?</div>
+      <div class="stars" role="radiogroup" aria-labelledby="q1" data-k="general"></div>
+      <div class="hint">1 = nada satisfecha · 5 = muy satisfecha</div>
+      <div class="q" id="q2">¿Qué tan claras son las explicaciones?</div>
+      <div class="stars" role="radiogroup" aria-labelledby="q2" data-k="claridad"></div>
+      <div class="q" id="q3">¿Qué tanto te está ayudando para el examen?</div>
+      <div class="stars" role="radiogroup" aria-labelledby="q3" data-k="utilidad"></div>
+      <div class="q" id="q4">¿Qué módulo te gustó más?</div>
+      <div class="stars" role="radiogroup" aria-labelledby="q4" data-k="favorito" data-opts="Guía 1|Práctica|Guía 2|Simulacro|Contrastes"></div>
+      <label class="f" for="cm">¿Qué mejorarías o qué te faltó? (opcional)</label>
+      <textarea id="cm" maxlength="1500"></textarea>
+      <label class="row" style="margin-top:10px;font-size:13.5px;color:var(--muted);gap:8px"><input type="checkbox" id="inc" checked> Incluir mi avance en el curso (puntajes y tiempos)</label>
+      <div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn" type="submit" id="send">Enviar mi opinión</button></div>
+      <div class="okm" id="cmsg" role="status"></div>
+    </form>
+
+    <h2>Seguridad</h2>
+    <details class="card">
+      <summary>Cambiar mi contraseña</summary>
+      <form id="pf" style="max-width:420px" autocomplete="off">
+        <label class="f" for="p0">Contraseña actual</label><input type="password" id="p0" required autocomplete="current-password">
+        <label class="f" for="p1">Contraseña nueva (mínimo 8 caracteres)</label><input type="password" id="p1" required minlength="8" autocomplete="new-password">
+        <label class="f" for="p2">Repite la contraseña nueva</label><input type="password" id="p2" required minlength="8" autocomplete="new-password">
+        <div class="err" id="perr" role="alert"></div><div class="okm" id="pok" role="status"></div>
+        <div class="row" style="margin-top:6px"><span class="sp"></span><button class="btn" type="submit">Guardar contraseña</button></div>
+        <p class="hint">La contraseña nueva se guarda en este navegador. En otra computadora sigue funcionando la contraseña original hasta que la cambies también ahí (o cargues tu respaldo).</p>
+      </form>
+    </details>
+  </section>
+<p class="sub" style="margin-top:28px;font-size:12.5px">Tus avances y resultados se guardan automáticamente en un servidor para que Jair pueda revisarlos y ajustar tu plan. Tu respaldo local sigue funcionando igual.</p>
+<p class="sub" id="estado-sync" style="font-size:12.5px;margin-top:6px"></p>
+<p class="sub" style="font-size:12.5px;margin-top:4px"><button type="button" class="btn sec" id="btn-enviar" style="padding:6px 12px;font-size:13px">Enviar mi avance ahora</button> <span id="envio-info"></span></p>
+<div class="vh-wrap"><span class="vh-txt" title="Versión del curso">v1.0.0 — build 2026-11-25</span></div>
+</main>
+
+<script src="sync.js?v=1.0.0"></script>
+<script>
+const DEFAULT_HASH = "05759ede28e37523b246d84f100effa7a5eb1289c7bc927b0cde2bb0fd6165ad";
+const WEB3FORMS_KEY = "ed4b98c1-df0d-49b9-8522-976eb3bfc6ad";
+const DATA_KEYS = ["rene-diagnostico","rene-guia1","rene-guia2","rene-practica","rene-simulacro1","rene-pass-hash","rene-csat"];
+const MODS = [
+  {k:"rene-diagnostico", n:"Paso 0", t:"Diagnóstico", d:"20 preguntas en 30 minutos para ver de dónde partes. Con tu resultado se ajusta tu ruta.", href:"diagnostico.html", kind:"sim", total:20, rev:"diagnostico-revision.html", rel:[]},
+  {k:"rene-guia1", n:"Paso 1", t:"Guía 1 · Conceptos base", d:"Servicios especializados, gobernanza, herramientas de SageMaker, prompts, métricas, inferencia y ML.", href:"guia-1.html", kind:"guia", rel:["svc","ml","gen"]},
+  {k:"rene-practica", n:"Paso 2", t:"Práctica interactiva", d:"16 ejercicios: une parejas, completa frases, ordena pasos y opción múltiple.", href:"practica.html", kind:"practica", rel:["svc","ml","gen"]},
+  {k:"rene-guia2", n:"Paso 3", t:"Guía 2 · Temas avanzados", d:"Seguridad y cumplimiento, kit de SageMaker, Q y Lex, cómo adaptar y evaluar modelos.", href:"guia-2.html", kind:"guia", rel:["gen","bed"]},
+  {k:"rene-simulacro1", n:"Paso 4", t:"Simulacro tipo examen", d:"65 preguntas, 90 minutos, los 5 dominios con el peso oficial. Se califica solo.", href:"simulacro.html", kind:"sim", total:65, rev:"simulacro-revision.html", rel:["final"]},
+  {k:null, rel:[], n:"Repaso", t:"Hoja de contrastes", d:"Tablas con las parejas de servicios que más se confunden y un truco para cada una.", href:"contrastes.html", kind:"lectura"}
+];
+async function sha(s){ const b=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""); }
+function curHash(){ return localStorage.getItem("rene-pass-hash") || DEFAULT_HASH; }
+function get(k){ try{ return JSON.parse(localStorage.getItem(k)||"null"); }catch(e){ return null; } }
+function fmt(ms){ const s=Math.round((ms||0)/1000); return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0"); }
+const $=id=>document.getElementById(id);
+
+function status(m){
+  if(!m.k) return {cls:"none", txt:"Para repasar cuando quieras", btn:"Abrir"};
+  const st=get(m.k);
+  if(!st||!st.started) return {cls:"none", txt:"Sin empezar", btn:"Empezar"};
+  if(m.kind==="sim"){
+    if(!st.done) return {cls:"prog", txt:"En curso · "+Object.keys(st.a||{}).length+" de "+m.total+" contestadas", btn:"Continuar"};
+    const sc=m.k==="rene-diagnostico"&&diag()?" · "+diag().ok+" de 20":"";
+    return {cls:"done", txt:"Terminado en "+fmt(st.base)+sc, btn:"Ver calificación", href:m.rev};
+  }
+  const res=Object.values(st.res||{}).filter(r=>r&&r.correcto!==undefined);
+  const ok=res.filter(r=>r.correcto).length;
+  if(!st.done) return {cls:"prog", txt:"En curso · "+res.length+" ejercicios resueltos", btn:"Continuar"};
+  return {cls:"done", txt:"Terminado · "+ok+" de "+res.length+" correctos · "+fmt(st.base), btn:"Ver resultados"};
+}
+
+// ---------- Tu siguiente paso (Rene) ----------
+const ORDEN=["rene-diagnostico","rene-guia1","rene-practica","rene-guia2","rene-simulacro1"];
+const PORQUE={
+  "rene-diagnostico":"Son 20 preguntas para ver de dónde partes. Con tu resultado se ajusta tu ruta y sabrás en qué temas enfocarte.",
+  "rene-guia1":"Los conceptos base del examen y los servicios que más se confunden, con tablas, tarjetas y ejercicios.",
+  "rene-practica":"Pones a prueba lo de la Guía 1: une parejas, completa frases y ordena pasos, con retroalimentación al momento.",
+  "rene-guia2":"Los temas avanzados: seguridad, kit de SageMaker, asistentes de AWS y cómo adaptar y evaluar modelos.",
+  "rene-simulacro1":"65 preguntas en 90 minutos, igual que el examen real. Busca un rato sin interrupciones."
+};
+function nextStep(){
+  for(let i=0;i<ORDEN.length;i++){ const m=MODS.find(x=>x.k===ORDEN[i]), st=get(ORDEN[i]);
+    if(!st||!st.done) return {m, i, started:!!(st&&st.started), st}; }
+  return null;
+}
+function renderNext(){
+  const n=nextStep(), el=$("next");
+  document.querySelectorAll(".mod").forEach(x=>x.classList.remove("is-next"));
+  if(!n){ el.innerHTML='<div class="k">Tu siguiente paso</div><h2>Terminaste todo el curso</h2><p>Revisa tu calificación del simulacro. Si sacaste 80% o más, ya puedes agendar el examen. Si no, repasa los temas que fallaste y vuelve a intentarlo.</p><div class="row"><a class="btn" href="simulacro-revision.html">Ver mi calificación</a></div>'; return; }
+  const b=badge(n.m), extra=n.started?(n.m.kind==="sim"?Object.keys(n.st.a||{}).length+" de "+n.m.total+" contestadas.":"Ya empezaste; sigue donde te quedaste."):"";
+  el.innerHTML='<div class="k">Tu siguiente paso · '+n.m.n+' de 4</div><h2>'+n.m.t+'</h2><p>'+PORQUE[n.m.k]+'</p>'+
+    '<div class="meta">'+(b&&b.c!=="na"?'Según tu diagnóstico: <b>'+b.t+'</b>. ':'')+extra+'</div>'+
+    '<div class="row"><a class="btn" href="'+n.m.href+'">'+(n.started?"Continuar":"Empezar")+'</a></div>';
+  const card=document.querySelector('.mod[data-k="'+n.m.k+'"]');
+  if(card){ card.classList.add("is-next"); if(!card.querySelector(".nx")) card.querySelector("h3").insertAdjacentHTML("beforebegin",'<span class="nx">Siguiente</span>'); }
+}
+function renderMods(){
+  $("mods").innerHTML=MODS.map(m=>{ const s=status(m), b=badge(m);
+    return '<article class="mod" data-k="'+(m.k||'')+'"><div class="n">'+m.n+'</div><h3>'+m.t+'</h3>'+(b?'<div class="badge '+b.c+'">'+b.t+'</div>':'')+'<p>'+m.d+'</p><div class="st '+s.cls+'">'+s.txt+'</div><a class="btn" href="'+(s.href||m.href)+'">'+s.btn+'</a></article>'; }).join("");
+  renderRuta();
+  renderNext();
+  if(!diag()){ document.querySelectorAll('.mod').forEach(c=>{ if(c.dataset.k!==ORDEN[0]){ c.style.opacity='.55'; const a=c.querySelector('a.btn'); if(a){ a.removeAttribute('href'); a.setAttribute('aria-disabled','true'); a.style.pointerEvents='none'; a.style.filter='grayscale(1)'; a.textContent='Primero el diagnóstico'; } } }); }
+}
+function envioInfo(){ const el=$("envio-info"); if(!el||!window.AIF_ULTIMOS) return; const l=AIF_ULTIMOS();
+  el.textContent = l.length ? "Último intento: "+l[0].m+" a las "+new Date(l[0].t).toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit",hour12:false})+" · "+l[0].e : "Todavía no hay envíos en este navegador."; }
+function enviarAhora(){ if(window.AIF_SNAPSHOT) AIF_SNAPSHOT(true); setTimeout(envioInfo,1200); }
+function estadoSync(){ const el=$("estado-sync"); if(!el||!window.AIF_ESTADO) return; el.textContent="Guardado en el servidor: comprobando..."; el.style.color="";
+  AIF_ESTADO(ok=>{ el.innerHTML= ok ? '<span style="color:var(--ok);font-weight:700">Guardado en el servidor: conectado.</span>' : '<span style="color:var(--bad);font-weight:700">Guardado en el servidor: SIN conexión.</span> Algo en tu red o navegador lo bloquea; tus resultados solo quedan en este navegador. Usa "Descargar mi respaldo" o pégaselos a Kiro.'; }); }
+function showApp(){ if(window.AIF_ALERTA_USO) AIF_ALERTA_USO(); $("login").classList.add("hidden"); $("app").classList.remove("hidden"); if(window.AIF_SNAPSHOT) AIF_SNAPSHOT(); renderMods(); estadoSync(); envioInfo(); $("btn-enviar").onclick=enviarAhora; }
+function showLogin(){ $("app").classList.add("hidden"); $("login").classList.remove("hidden"); $("pw").focus(); }
+
+$("lf").onsubmit=async e=>{ e.preventDefault();
+  if(await sha($("pw").value)===curHash()){ sessionStorage.setItem("rene-auth","ok"); $("pw").value=""; $("lerr").textContent=""; showApp(); }
+  else { $("lerr").textContent="Contraseña incorrecta. Intenta de nuevo."; $("pw").select(); } };
+$("logout").onclick=()=>{ sessionStorage.removeItem("rene-auth"); showLogin(); };
+
+$("pf").onsubmit=async e=>{ e.preventDefault(); $("perr").textContent=""; $("pok").textContent="";
+  if(await sha($("p0").value)!==curHash()){ $("perr").textContent="La contraseña actual no es correcta."; return; }
+  if($("p1").value.length<8){ $("perr").textContent="La nueva debe tener al menos 8 caracteres."; return; }
+  if($("p1").value!==$("p2").value){ $("perr").textContent="Las contraseñas nuevas no coinciden."; return; }
+  localStorage.setItem("rene-pass-hash", await sha($("p1").value)); e.target.reset(); $("pok").textContent="Listo. Tu contraseña nueva ya está guardada en este navegador."; };
+
+// Respaldo
+$("exp").onclick=async()=>{
+  const data={app:"aif-c01-rene", version:1, fecha:new Date().toISOString(), datos:{}};
+  DATA_KEYS.forEach(k=>{ const v=localStorage.getItem(k); if(v!==null) data.datos[k]=v; });
+  const txt=JSON.stringify(data,null,2), name="respaldo-aif-c01-rene-"+new Date().toISOString().slice(0,10)+".json";
+  try{ if(window.showSaveFilePicker){ const h=await window.showSaveFilePicker({suggestedName:name,types:[{description:"JSON",accept:{"application/json":[".json"]}}]}); const w=await h.createWritable(); await w.write(txt); await w.close(); }
+    else { const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([txt],{type:"application/json"})); a.download=name; a.click(); }
+    $("dmsg").textContent="Respaldo descargado. Guárdalo en tu carpeta del curso."; }catch(e){ if(e.name!=="AbortError") $("dmsg").textContent="No se pudo descargar el respaldo."; }
+};
+$("imp").onclick=()=>$("impf").click();
+$("impf").onchange=async e=>{ const f=e.target.files[0]; if(!f) return;
+  try{ const d=JSON.parse(await f.text()); if(d.app!=="aif-c01-rene"||!d.datos) throw 0;
+    if(!confirm("¿Cargar este respaldo? Reemplaza el avance que tienes en este navegador.")) return;
+    Object.keys(d.datos).forEach(k=>{ if(DATA_KEYS.includes(k)) localStorage.setItem(k,d.datos[k]); });
+    renderMods(); $("dmsg").textContent="Respaldo cargado."; }catch(err){ $("dmsg").textContent="Ese archivo no es un respaldo válido del curso."; }
+  e.target.value=""; };
+
+// CSAT
+const csat={};
+document.querySelectorAll(".stars").forEach(g=>{ const opts=g.dataset.opts?g.dataset.opts.split("|"):["1","2","3","4","5"];
+  opts.forEach(o=>{ const b=document.createElement("button"); b.type="button"; b.textContent=o; b.setAttribute("role","radio"); b.setAttribute("aria-checked","false");
+    b.onclick=()=>{ g.querySelectorAll("button").forEach(x=>{x.classList.remove("on"); x.setAttribute("aria-checked","false");}); b.classList.add("on"); b.setAttribute("aria-checked","true"); csat[g.dataset.k]=o; };
+    g.appendChild(b); }); });
+function progressSummary(){
+  return MODS.filter(m=>m.k).map(m=>m.t+": "+status(m).txt).join("\n");
+}
+$("csat").onsubmit=async e=>{ e.preventDefault(); const msg=$("cmsg");
+  if(!csat.general){ msg.style.color="#fca5a5"; msg.textContent="Elige al menos tu satisfacción general."; return; }
+  const entry={fecha:new Date().toISOString(), ...csat, comentario:$("cm").value.trim()};
+  const hist=get("rene-csat")||[]; hist.push(entry); localStorage.setItem("rene-csat", JSON.stringify(hist));
+  $("send").disabled=true; msg.style.color=""; msg.textContent="Enviando...";
+  const body={access_key:WEB3FORMS_KEY, subject:"CSAT curso AIF-C01 · Rene", from_name:"Curso AIF-C01 de Rene",
+    "Satisfacción general (1-5)":csat.general, "Claridad (1-5)":csat.claridad||"-", "Utilidad para el examen (1-5)":csat.utilidad||"-",
+    "Módulo favorito":csat.favorito||"-", "Comentario":entry.comentario||"-"};
+  if($("inc").checked) body["Avance"]=progressSummary();
+  try{ const r=await fetch("https://api.web3forms.com/submit",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(body)});
+    const j=await r.json(); if(!j.success) throw 0;
+    msg.textContent="Gracias, Rene. Tu opinión ya llegó."; e.target.reset(); document.querySelectorAll(".stars button").forEach(x=>{x.classList.remove("on");x.setAttribute("aria-checked","false");}); Object.keys(csat).forEach(k=>delete csat[k]);
+  }catch(err){ msg.style.color="#fca5a5"; msg.textContent="No se pudo enviar ahora. Tu opinión quedó guardada en tu respaldo; intenta de nuevo más tarde."; }
+  $("send").disabled=false; };
+
+
+// ---- Diagnóstico y ruta personalizada ----
+const DKEY = {"1": "B", "2": "C", "3": "C", "4": "D", "5": "C", "6": "D", "7": "B", "8": "C", "9": "A", "10": "D", "11": "BD", "12": "B", "13": "C", "14": "C", "15": "A", "16": "B", "17": "D", "18": "C", "19": "A", "20": "C"};
+const BLOQUES = [
+  {id:"svc", n:"Servicios especializados y gobernanza", q:[7,8,10,12,19], foco:"Guía 1: temas 1 a 4 (qué entra y qué sale, A2I vs Ground Truth, CloudTrail vs CloudWatch, Clarify vs Model Monitor). Luego la hoja de contrastes."},
+  {id:"ml", n:"Fundamentos de machine learning", q:[2,9,15], foco:"Guía 1: tema 9 (regresión, clasificación, clustering, overfitting) y tema 7 (métricas)."},
+  {id:"gen", n:"Parámetros y técnicas de GenAI", q:[3,4,11,14,17,20], foco:"Guía 1: temas 6, 8 y 10. Guía 2: temas 6, 7 y 8 (adaptar modelos, evaluar y temperatura)."},
+  {id:"bed", n:"Bedrock, RAG y seguridad", q:[1,5,6,13,16,18], foco:"Guía 2: temas 1 a 5 (seguridad, cumplimiento, red y datos, kit de SageMaker y asistentes)."}
+];
+function diag(){
+  const st=get("rene-diagnostico"); if(!st||!st.done) return null;
+  const a=st.a||{}; let ok=0; const b={};
+  Object.keys(DKEY).forEach(k=>{ if((a[k]||"")===DKEY[k]) ok++; });
+  BLOQUES.forEach(x=>{ const c=x.q.filter(n=>(a[n]||"")===DKEY[n]).length; b[x.id]={ok:c,n:x.q.length,pct:Math.round(100*c/x.q.length)}; });
+  return {ok, b};
+}
+function nivel(p){ return p<60?{c:"hi",t:"Prioridad alta"}:p<85?{c:"md",t:"Recomendado"}:{c:"lo",t:"Puedes ir rápido"}; }
+function badge(m){
+  if(!m.rel||!m.rel.length) return null;
+  const d=diag();
+  if(!d) return {c:"na",t:"Haz primero el diagnóstico"};
+  if(m.rel[0]==="final") return d.ok>=16?{c:"lo",t:"Ya puedes intentarlo"}:{c:"md",t:"Al final, después de las guías"};
+  return nivel(Math.min(...m.rel.map(r=>d.b[r].pct)));
+}
+function renderRuta(){
+  const el=$("ruta"), d=diag();
+  if(!d){ el.innerHTML='<p class="sub" style="margin:0">Empieza por el <b>Paso 0 · Diagnóstico</b>. Al terminarlo, aquí verás qué temas son prioridad para ti y cada paso se marca como prioridad alta, recomendado o "puedes ir rápido".</p><div class="row" style="margin-top:12px"><a class="btn" href="diagnostico.html">Hacer el diagnóstico</a></div>'; return; }
+  const orden=BLOQUES.slice().sort((x,y)=>d.b[x.id].pct-d.b[y.id].pct);
+  el.innerHTML='<p class="sub" style="margin:0">Diagnóstico: <b style="color:#e2e8f0">'+d.ok+' de 20 ('+Math.round(d.ok*5)+'%)</b>. Estos son tus temas, del más débil al más fuerte. Enfócate primero en los que dicen "Prioridad alta".</p>'+
+   '<table class="rt"><thead><tr><th>Tema</th><th>Resultado</th><th>Nivel</th><th>Dónde reforzarlo</th></tr></thead><tbody>'+
+   orden.map(x=>{ const r=d.b[x.id], nv=nivel(r.pct); return '<tr><td><b>'+x.n+'</b></td><td>'+r.ok+' de '+r.n+'</td><td><span class="badge '+nv.c+'">'+nv.t+'</span></td><td>'+x.foco+'</td></tr>'; }).join("")+
+   '</tbody></table><p class="hint" style="margin-top:10px">Puedes repetir el diagnóstico desde su calificación cuando termines las guías, para ver cuánto mejoraste.</p>';
+}
+
+if(sessionStorage.getItem("rene-auth")==="ok") showApp(); else showLogin();
+</script>
+</body>
+</html>

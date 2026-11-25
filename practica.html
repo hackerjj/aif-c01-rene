@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="auth.js"></script>
+<script src="sync.js?v=2.7.2"></script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Práctica interactiva · AIF-C01</title>
+<style>
+  :root { --bg:#0f172a; --card:#111c33; --ink:#e2e8f0; --muted:#94a3b8; --accent:#ff9900; --ok:#22c55e; --bad:#ef4444; --line:#1e2a44; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--ink); line-height:1.5; }
+  .wrap { padding-top:44px !important; max-width:760px; margin:0 auto; padding:20px 16px 60px; }
+  header { display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+  .pbar { flex:1; height:12px; background:#1e2a44; border-radius:99px; overflow:hidden; }
+  .pbar i { display:block; height:100%; width:0; background:var(--accent); transition:width .3s; }
+  .timer { font-variant-numeric:tabular-nums; font-weight:700; font-size:16px; min-width:64px; text-align:right; }
+  .ico { display:inline-block; width:1em; height:1em; vertical-align:-0.125em; margin-right:5px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px; }
+  .kind { font-size:12px; color:var(--accent); font-weight:700; letter-spacing:.4px; text-transform:uppercase; }
+  h1 { font-size:24px; margin:0 0 8px; }
+  h2 { font-size:19px; margin:6px 0 16px; }
+  p.muted { color:var(--muted); }
+  .btn { background:var(--accent); color:#111; border:0; border-radius:10px; padding:12px 18px; font-weight:800; font-size:15px; cursor:pointer; }
+  .btn:disabled { opacity:.4; cursor:not-allowed; }
+  .btn.sec { background:#1e2a44; color:var(--ink); }
+  button:focus-visible { outline:2px solid #fff; outline-offset:2px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .chip { display:block; width:100%; text-align:left; background:#0d1629; color:var(--ink); border:2px solid var(--line); border-radius:10px; padding:11px 12px; font-size:14.5px; cursor:pointer; }
+  .chip:hover { border-color:#334366; }
+  .chip.sel { border-color:var(--accent); background:#1a2540; }
+  .chip.done { border-color:var(--ok); background:#10291c; color:#9be7b4; cursor:default; }
+  .chip.wrong { border-color:var(--bad); background:#2a1215; }
+  .chip.used { visibility:hidden; }
+  .bank { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+  .bank .chip { width:auto; display:inline-block; }
+  .sentence { font-size:17px; line-height:2.2; }
+  .blank { display:inline-block; min-width:130px; border-bottom:2px solid var(--accent); padding:0 8px; margin:0 3px; text-align:center; cursor:pointer; background:none; color:var(--ink); border-top:0; border-left:0; border-right:0; font-size:16px; }
+  .blank.empty { color:var(--muted); }
+  .orderlist { min-height:52px; border:2px dashed var(--line); border-radius:10px; padding:8px; display:flex; flex-direction:column; gap:6px; }
+  .orderlist .chip { width:100%; }
+  .orderlist .num { color:var(--accent); font-weight:800; margin-right:6px; }
+  .actions { display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
+  .fb { margin-top:16px; padding:14px; border-radius:10px; font-size:14.5px; }
+  .fb.ok { background:#10291c; border:1px solid #1f6b3c; }
+  .fb.bad { background:#2a1215; border:1px solid #7f1d1d; }
+  .fb b.t { display:block; font-size:16px; margin-bottom:4px; }
+  .fb.ok b.t { color:var(--ok); } .fb.bad b.t { color:#fca5a5; }
+  table { width:100%; border-collapse:collapse; font-size:14px; margin-top:12px; }
+  th,td { border:1px solid var(--line); padding:7px 9px; text-align:left; }
+  th { background:#0d1629; color:var(--accent); }
+  .score { font-size:40px; font-weight:800; color:var(--accent); }
+  #msg { color:var(--ok); font-size:13px; margin-top:8px; min-height:1em; }
+  @media (max-width:560px){ .grid2{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:10px;left:12px;z-index:50;background:#1e2a44;color:#e2e8f0;text-decoration:none;font:700 13px -apple-system,BlinkMacSystemFont,sans-serif;padding:7px 11px;border-radius:8px">Inicio</a>
+
+<div class="wrap">
+  <header>
+    <div class="pbar" aria-hidden="true"><i id="pb"></i></div>
+    <div class="timer" id="timer" aria-label="Tiempo transcurrido">00:00</div>
+    <button type="button" class="btn sec" id="restart" style="padding:6px 10px;font-size:13px">Reiniciar</button>
+  </header>
+  <main id="app" aria-live="polite"></main>
+</div>
+
+<script>
+const EX = [
+ {t:"match", title:"Une cada servicio con lo que hace", pairs:[
+   ["Textract","Saca texto, tablas y campos de documentos escaneados"],
+   ["Transcribe","Convierte audio o voz en texto"],
+   ["Polly","Convierte texto en voz"],
+   ["Comprehend","Detecta sentimiento, entidades y PII en un texto"],
+   ["Translate","Traduce texto de un idioma a otro"],
+   ["Rekognition","Analiza fotos y video: objetos, rostros, contenido inapropiado"]]},
+ {t:"match", title:"Une cada servicio de gobernanza con su pregunta", pairs:[
+   ["CloudTrail","¿Quién hizo qué llamada a la API, cuándo y desde dónde?"],
+   ["CloudWatch","¿Cómo van la latencia, los errores y las alarmas ahora?"],
+   ["Config","¿Cómo está configurado un recurso y cumple la regla?"],
+   ["Audit Manager","¿Qué evidencia le entrego al auditor?"],
+   ["Trusted Advisor","¿Qué me recomienda AWS mejorar en costo y seguridad?"]]},
+ {t:"match", title:"Une cada herramienta de SageMaker y A2I con su momento", pairs:[
+   ["Ground Truth","Antes de entrenar: personas etiquetan los datos"],
+   ["Clarify","Revisa sesgo y explica qué variables pesan"],
+   ["Model Monitor","En producción: detecta drift contra el baseline"],
+   ["Model Cards","Documenta uso previsto, riesgo y entrenamiento"],
+   ["A2I","En producción: una persona revisa predicciones dudosas"]]},
+ {t:"fill", text:"Para revisar si un modelo tiene sesgo antes de desplegarlo uso ___. Para detectar drift cuando ya está en producción uso ___.",
+   ans:["Clarify","Model Monitor"], bank:["Clarify","Model Monitor","Model Cards","Ground Truth"],
+   exp:"Clarify mira la justicia del modelo (sesgo y explicabilidad). Model Monitor vigila que los datos y la calidad no se degraden con el tiempo."},
+ {t:"mc", s:"Un modelo de detección de fraude lleva 8 meses en producción. Los patrones de compra de los clientes cambiaron y el equipo quiere una alerta automática cuando los datos nuevos se alejen de los datos con que se entrenó. ¿Qué usan?",
+   o:["Amazon SageMaker Clarify","Amazon SageMaker Model Monitor","Amazon SageMaker Model Cards","Amazon Augmented AI (A2I)"], a:1,
+   exp:"\"En producción\" + \"se alejan de los datos de entrenamiento\" = drift. Eso lo vigila Model Monitor."},
+ {t:"fill", text:"___ registra quién hizo cada llamada a la API de AWS. ___ muestra métricas en tiempo real y dispara alarmas cuando sube la latencia.",
+   ans:["CloudTrail","CloudWatch"], bank:["CloudWatch","CloudTrail","Config","Trusted Advisor"],
+   exp:"Trail = rastro de acciones (auditoría). Watch = vigilar el comportamiento (métricas, logs, alarmas)."},
+ {t:"mc", s:"El comité de riesgos de un banco pide que cada modelo tenga, en un solo lugar, su propósito, sus limitaciones conocidas, su nivel de riesgo y con qué datos se entrenó. ¿Qué usan?",
+   o:["Amazon SageMaker Model Monitor","AWS CloudTrail","Amazon SageMaker Model Cards","Amazon SageMaker Clarify"], a:2,
+   exp:"Documentar el modelo para gobernanza = Model Cards. No mide ni vigila nada; es la ficha del modelo."},
+ {t:"match", title:"Une cada técnica de prompt con su ejemplo", pairs:[
+   ["Zero-shot","\"Resume este texto.\" (sin ejemplos)"],
+   ["Few-shot","Incluye 3 ejemplos de entrada y salida antes de la pregunta"],
+   ["Chain-of-thought","\"Razona paso a paso antes de responder.\""],
+   ["Negative prompting","\"No menciones precios ni a la competencia.\""]]},
+ {t:"fill", text:"Si lo peor es que se me escape un fraude, priorizo ___. Si lo peor es dar una falsa alarma, priorizo ___.",
+   ans:["recall","precision"], bank:["precision","accuracy","recall","RMSE"],
+   exp:"Recall = no se me escapa ningún positivo. Precision = cuando digo que sí, de verdad es sí. Con clases desbalanceadas, la accuracy engaña."},
+ {t:"order", s:"Ordena los pasos de una solución RAG, del primero al último.",
+   steps:["Dividir los documentos en chunks","Generar embeddings de cada chunk","Guardar los vectores en una base vectorial","Convertir la pregunta en embedding y recuperar los chunks más parecidos","Enviar la pregunta y el contexto recuperado al LLM para generar la respuesta"],
+   exp:"Primero preparas e indexas (chunks, embeddings, base vectorial). Luego, en cada pregunta, recuperas y después generas."},
+ {t:"order", s:"Ordena las fases del ciclo de vida de un modelo de ML.",
+   steps:["Recolectar y preparar los datos","Entrenar el modelo","Evaluar con datos de prueba","Desplegar a producción","Monitorear en producción"],
+   exp:"Datos, entrenamiento, evaluación, despliegue y monitoreo. El examen pide ordenar fases como esta."},
+ {t:"mc", s:"Una aseguradora ya tiene en producción un modelo que clasifica reclamaciones. Cuando la confianza es baja, un ajustador humano debe revisar el caso antes de pagarlo. ¿Qué servicio usan?",
+   o:["Amazon SageMaker Ground Truth","Amazon SageMaker Model Monitor","Amazon Augmented AI (A2I)","Amazon SageMaker Clarify"], a:2,
+   exp:"Revisión humana de predicciones en producción = A2I. Ground Truth es etiquetar datos antes de entrenar."},
+ {t:"match", title:"Une cada concepto con su uso", pairs:[
+   ["ROUGE","Comparar resúmenes generados vs resúmenes de referencia"],
+   ["BLEU","Comparar traducciones generadas vs traducciones de referencia"],
+   ["RMSE","Medir el error de un modelo de regresión"],
+   ["Batch inference","Procesar miles de documentos sin prisa y más barato"],
+   ["Provisioned Throughput","Capacidad garantizada para tráfico alto o un modelo fine-tuned"]]},
+ {t:"fill", text:"Una temperatura ___ da respuestas más consistentes. Una temperatura ___ da respuestas más creativas y variadas.",
+   ans:["baja","alta"], bank:["alta","Top-K","baja","máxima"],
+   exp:"Temperatura baja = predecible (soporte, extracción, JSON). Temperatura alta = creativa (marketing, lluvia de ideas)."},
+ {t:"mc", s:"Un regulador pide al banco explicar por qué su modelo rechazó un crédito: qué variables pesaron más en esa decisión. ¿Qué servicio ayuda a dar esa explicación?",
+   o:["Amazon SageMaker Clarify","Amazon SageMaker Model Cards","AWS Audit Manager","Amazon SageMaker Ground Truth"], a:0,
+   exp:"Clarify hace dos cosas: detecta sesgo y explica qué variables influyen en cada predicción (explicabilidad)."},
+ {t:"fill", text:"Si la salida es un número uso ___. Si la salida es una categoría uso ___. Si no tengo etiquetas y quiero formar grupos uso ___.",
+   ans:["regresión","clasificación","clustering"], bank:["clustering","refuerzo","regresión","clasificación"],
+   exp:"Número = regresión. Categoría = clasificación. Sin etiquetas = clustering. Recompensas y castigos = refuerzo."}
+];
+const KIND = {match:"Une las parejas", fill:"Completa la frase", mc:"Elige la respuesta", order:"Ordena los pasos"};
+const KEY = "rene-practica";
+let st = JSON.parse(localStorage.getItem(KEY) || "null") || {started:false, done:false, idx:0, base:0, res:[]};
+let runFrom = null, exFrom = null, tick = null, cur = null;
+
+function save(){ localStorage.setItem(KEY, JSON.stringify(st)); }
+function elapsed(){ return st.base + (runFrom ? Date.now()-runFrom : 0); }
+function fmt(ms){ const s=Math.round(ms/1000); return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0"); }
+function startClock(){ runFrom=Date.now(); tick=setInterval(()=>{ document.getElementById("timer").textContent=fmt(elapsed()); },500); }
+function stopClock(){ st.base=elapsed(); runFrom=null; clearInterval(tick); document.getElementById("timer").textContent=fmt(st.base); save(); }
+window.addEventListener("beforeunload", ()=>{ if(runFrom){ st.base=elapsed(); save(); } });
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+function progress(){ document.getElementById("pb").style.width=(100*st.idx/EX.length)+"%"; }
+const app = document.getElementById("app");
+
+function intro(){
+  app.innerHTML = '<div class="card"><div class="kind">Práctica interactiva</div><h1>Une, completa y ordena</h1>'+
+   '<p class="muted">16 ejercicios sobre los temas que más se confunden en el examen: servicios especializados, gobernanza, herramientas de SageMaker, prompts, métricas y ML. Aquí sí ves si acertaste en cada ejercicio, para que aprendas en el momento. Cuenta como correcto solo si lo resuelves sin errores al primer intento.</p>'+
+   '<p class="muted">El timer arranca cuando das clic en Iniciar. El tiempo total y el de cada ejercicio se guardan en tus resultados.</p>'+
+   '<div class="actions"><button class="btn" id="go">Iniciar</button></div></div>';
+  document.getElementById("go").onclick=()=>{ st.started=true; save(); startClock(); show(); };
+}
+
+function show(){
+  progress();
+  if(st.idx>=EX.length){ return finish(); }
+  const e=EX[st.idx]; exFrom=elapsed();
+  cur={e, err:0, resp:null};
+  const head='<div class="kind">'+KIND[e.t]+' · '+(st.idx+1)+' de '+EX.length+'</div>';
+  if(e.t==="match") renderMatch(head,e);
+  else if(e.t==="fill") renderFill(head,e);
+  else if(e.t==="mc") renderMC(head,e);
+  else renderOrder(head,e);
+}
+
+function feedback(ok, correctText, exp){
+  const box=document.createElement("div");
+  box.className="fb "+(ok?"ok":"bad");
+  box.innerHTML='<b class="t">'+(ok?"Correcto":"No del todo")+'</b>'+(ok?"":'<div>Respuesta correcta: <b>'+esc(correctText)+'</b></div>')+(exp?'<div style="margin-top:6px">'+esc(exp)+'</div>':"");
+  return box;
+}
+function record(ok){
+  const sec=Math.round((elapsed()-exFrom)/1000);
+  st.res[st.idx]={tipo:cur.e.t, correcto:ok, errores:cur.err, segundos:sec, respuesta:cur.resp};
+  save();
+}
+function nextBtn(container){
+  const a=document.createElement("div"); a.className="actions";
+  const b=document.createElement("button"); b.className="btn"; b.textContent=st.idx+1>=EX.length?"Ver resultados":"Continuar";
+  b.onclick=()=>{ st.idx++; save(); show(); };
+  a.appendChild(b); container.appendChild(a); b.focus();
+}
+
+function renderMatch(head,e){
+  const card=document.createElement("div"); card.className="card";
+  card.innerHTML=head+'<h2>'+esc(e.title)+'</h2><div class="grid2"><div id="L" style="display:flex;flex-direction:column;gap:10px"></div><div id="R" style="display:flex;flex-direction:column;gap:10px"></div></div>';
+  app.innerHTML=""; app.appendChild(card);
+  const L=card.querySelector("#L"), R=card.querySelector("#R");
+  let selL=null, left=0;
+  e.pairs.forEach((p,i)=>{ const b=document.createElement("button"); b.className="chip"; b.textContent=p[0]; b.dataset.i=i; L.appendChild(b); });
+  shuffle(e.pairs.map((p,i)=>i)).forEach(i=>{ const b=document.createElement("button"); b.className="chip"; b.textContent=e.pairs[i][1]; b.dataset.i=i; R.appendChild(b); });
+  L.querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(b.classList.contains("done")) return; L.querySelectorAll("button").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); selL=b; });
+  R.querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    if(b.classList.contains("done")||!selL) return;
+    if(b.dataset.i===selL.dataset.i){
+      [b,selL].forEach(x=>{x.classList.remove("sel");x.classList.add("done");x.setAttribute("aria-disabled","true");});
+      selL=null; left++;
+      if(left===e.pairs.length){ cur.resp="todas unidas"; const ok=cur.err===0; record(ok);
+        const fb=feedback(true,"",ok?"Todas las parejas sin errores.":"Terminaste, pero con "+cur.err+" error(es). No cuenta como correcto al primer intento.");
+        if(!ok){ fb.className="fb bad"; fb.querySelector("b.t").textContent="Completado con errores"; }
+        card.appendChild(fb); nextBtn(card); }
+    } else {
+      cur.err++; b.classList.add("wrong"); selL.classList.add("wrong");
+      const s=selL; setTimeout(()=>{ b.classList.remove("wrong"); s.classList.remove("wrong"); },600);
+    }
+  });
+}
+
+function renderFill(head,e){
+  const card=document.createElement("div"); card.className="card";
+  const parts=e.text.split("___");
+  let html='<h2>Completa la frase</h2><p class="sentence">';
+  parts.forEach((p,i)=>{ html+=esc(p); if(i<parts.length-1) html+='<button class="blank empty" data-b="'+i+'" aria-label="Espacio '+(i+1)+'">&nbsp;</button>'; });
+  html+='</p><div class="bank" id="bank"></div><div class="actions"><button class="btn" id="chk" disabled>Comprobar</button></div>';
+  card.innerHTML=head+html; app.innerHTML=""; app.appendChild(card);
+  const fill=new Array(e.ans.length).fill(null), bank=card.querySelector("#bank"), chk=card.querySelector("#chk");
+  const blanks=[...card.querySelectorAll(".blank")];
+  shuffle(e.bank).forEach(w=>{ const b=document.createElement("button"); b.className="chip"; b.textContent=w; bank.appendChild(b);
+    b.onclick=()=>{ const k=fill.indexOf(null); if(k<0) return; fill[k]=b; b.classList.add("used"); blanks[k].textContent=w; blanks[k].classList.remove("empty"); chk.disabled=fill.includes(null); }; });
+  blanks.forEach((bl,k)=>bl.onclick=()=>{ if(!fill[k]||chk.dataset.done) return; fill[k].classList.remove("used"); fill[k]=null; bl.innerHTML="&nbsp;"; bl.classList.add("empty"); chk.disabled=true; });
+  chk.onclick=()=>{
+    chk.dataset.done=1; const got=fill.map(b=>b.textContent); cur.resp=got.join(" | ");
+    const ok=got.every((g,i)=>g===e.ans[i]); if(!ok) cur.err=1; record(ok);
+    chk.parentNode.remove(); card.appendChild(feedback(ok,e.ans.join(" / "),e.exp)); nextBtn(card);
+  };
+}
+
+function renderMC(head,e){
+  const card=document.createElement("div"); card.className="card";
+  card.innerHTML=head+'<h2>'+esc(e.s)+'</h2><div id="opts" role="radiogroup" style="display:flex;flex-direction:column;gap:9px"></div><div class="actions"><button class="btn" id="chk" disabled>Comprobar</button></div>';
+  app.innerHTML=""; app.appendChild(card);
+  let pick=null; const chk=card.querySelector("#chk"), opts=card.querySelector("#opts");
+  e.o.forEach((o,i)=>{ const b=document.createElement("button"); b.className="chip"; b.setAttribute("role","radio"); b.setAttribute("aria-checked","false");
+    b.textContent="ABCD"[i]+") "+o; opts.appendChild(b);
+    b.onclick=()=>{ if(chk.dataset.done) return; opts.querySelectorAll("button").forEach(x=>{x.classList.remove("sel");x.setAttribute("aria-checked","false");}); b.classList.add("sel"); b.setAttribute("aria-checked","true"); pick=i; chk.disabled=false; }; });
+  chk.onclick=()=>{
+    chk.dataset.done=1; cur.resp="ABCD"[pick]; const ok=pick===e.a; if(!ok) cur.err=1; record(ok);
+    const bs=opts.querySelectorAll("button"); bs[e.a].classList.add("done"); if(!ok) bs[pick].classList.add("wrong");
+    chk.parentNode.remove(); card.appendChild(feedback(ok,"ABCD"[e.a]+") "+e.o[e.a],e.exp)); nextBtn(card);
+  };
+}
+
+function renderOrder(head,e){
+  const card=document.createElement("div"); card.className="card";
+  card.innerHTML=head+'<h2>'+esc(e.s)+'</h2><p class="muted" style="margin-top:-8px">Toca los pasos en orden. Toca uno de tu lista para quitarlo.</p><div class="orderlist" id="ol"></div><div class="bank" id="bank"></div><div class="actions"><button class="btn" id="chk" disabled>Comprobar</button></div>';
+  app.innerHTML=""; app.appendChild(card);
+  const ol=card.querySelector("#ol"), bank=card.querySelector("#bank"), chk=card.querySelector("#chk"); let seq=[];
+  function draw(){ ol.innerHTML=""; seq.forEach((b,k)=>{ const x=document.createElement("button"); x.className="chip"; x.innerHTML='<span class="num">'+(k+1)+'.</span>'+esc(b.textContent);
+      x.onclick=()=>{ if(chk.dataset.done) return; b.classList.remove("used"); seq.splice(k,1); draw(); }; ol.appendChild(x); }); chk.disabled=seq.length!==e.steps.length; }
+  shuffle(e.steps).forEach(s=>{ const b=document.createElement("button"); b.className="chip"; b.textContent=s; bank.appendChild(b);
+    b.onclick=()=>{ if(b.classList.contains("used")||chk.dataset.done) return; b.classList.add("used"); seq.push(b); draw(); }; });
+  draw();
+  chk.onclick=()=>{
+    chk.dataset.done=1; const got=seq.map(b=>b.textContent); cur.resp=got.map(g=>e.steps.indexOf(g)+1).join("-");
+    const ok=got.every((g,i)=>g===e.steps[i]); if(!ok) cur.err=1; record(ok);
+    chk.parentNode.remove(); card.appendChild(feedback(ok,e.steps.map((s,i)=>(i+1)+". "+s).join("  "),e.exp)); nextBtn(card);
+  };
+}
+
+function summaryText(){
+  const ok=st.res.filter(r=>r&&r.correcto).length;
+  return "Práctica interactiva AIF-C01\nPuntaje: "+ok+" de "+EX.length+"\nTiempo total: "+fmt(st.base)+"\n"+
+    st.res.map((r,i)=>(i+1)+" ("+r.tipo+"): "+(r.correcto?"correcto":"incorrecto")+(r.errores?" · errores "+r.errores:"")+" · "+r.segundos+" s"+(r.tipo!=="match"?" · resp: "+r.respuesta:"")).join("\n");
+}
+function finish(){
+  if(!st.done){ stopClock(); st.done=true; st.fin=Date.now(); save(); }
+  progress(); document.getElementById("pb").style.width="100%";
+  const ok=st.res.filter(r=>r&&r.correcto).length;
+  let rows=st.res.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+KIND[r.tipo]+'</td><td>'+(r.correcto?"Correcto":"Incorrecto")+'</td><td>'+r.errores+'</td><td>'+r.segundos+' s</td></tr>').join("");
+  app.innerHTML='<div class="card"><div class="kind">Resultados</div><div class="score">'+ok+' de '+EX.length+'</div><p class="muted">Tiempo total: <b style="color:#e2e8f0">'+fmt(st.base)+'</b></p>'+
+   '<table><thead><tr><th>#</th><th>Tipo</th><th>Resultado</th><th>Errores</th><th>Tiempo</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+   '<div class="actions"><button class="btn sec" id="sv">Guardar archivo</button><button class="btn" id="cp">Copiar resultados</button></div><div id="msg" role="status"></div></div>';
+  const msg=t=>document.getElementById("msg").textContent=t;
+  document.getElementById("cp").onclick=async()=>{ try{ await navigator.clipboard.writeText(summaryText()); msg("Copiado."); }catch(e){ prompt("Copia este texto:",summaryText()); } };
+  document.getElementById("sv").onclick=async()=>{
+    const data=JSON.stringify({examen:"ronda-4", fecha:new Date().toISOString(), puntaje:ok, total:EX.length, tiempo_total_seg:Math.round(st.base/1000), tiempo_total:fmt(st.base), ejercicios:st.res},null,2);
+    try{ if(window.showSaveFilePicker){ const h=await window.showSaveFilePicker({suggestedName:"respuestas-ronda-4.json",types:[{description:"JSON",accept:{"application/json":[".json"]}}]}); const w=await h.createWritable(); await w.write(data); await w.close(); }
+      else { const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([data],{type:"application/json"})); a.download="respuestas-ronda-4.json"; a.click(); }
+      msg("Archivo guardado."); }catch(e){ if(e.name!=="AbortError") msg("No se pudo guardar: usa Copiar resultados."); }
+  };
+}
+
+document.getElementById("restart").onclick=()=>{ if(confirm("¿Reiniciar la práctica desde el principio? Se borra tu avance, tus respuestas y el tiempo.")){ clearInterval(tick); runFrom=null; localStorage.removeItem(KEY); location.reload(); } };
+document.getElementById("timer").textContent=fmt(st.base);
+if(!st.started) intro();
+else if(st.done) finish();
+else { startClock(); show(); }
+</script>
+</body>
+</html>
